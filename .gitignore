@@ -1,0 +1,15 @@
+node_modules
+dist
+release
+generated/*.docx
+generated/*.pdf
+.DS_Store
+*.log
+.vscode
+
+# Build artifacts / archives — must never be committed (GitHub 100MB limit)
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar

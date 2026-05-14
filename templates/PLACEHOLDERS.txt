@@ -1,0 +1,131 @@
+Sivivi — DOCX template placeholders (matches the example layout)
+==================================================================
+
+Delimiters: {{ ... }}
+
+IMPORTANT
+---------
+Every loop tag ({{#section}} and {{/section}}) MUST live in its own
+paragraph — never inline with other text. Otherwise docxtemplater
+throws "unclosed loop".
+
+
+==================================================================
+CURRICULUM VITAE
+==================================================================
+
+
+PROPOSED POSITION
+-----------------
+{{job_title}}
+
+
+PERSONAL DATA
+-------------
+Name                       : {{full_name}}
+Place, Date of Birth       : {{place_of_birth}}, {{date_of_birth}}
+Sex                        : {{sex}}
+Nationality                : {{nationality}}
+Last Education             : {{last_education}}
+
+
+FORMAL EDUCATION
+================
+Layout in Word: a 2-column table (Year | Institution). Put the loop
+tags on the first body row:
+
+  | {{#education}}{{year}} | {{institution}}{{/education}} |
+
+Optional 3rd column for degree if you want it. Loop will repeat the
+row for every education item.
+
+
+COURSE AND TRAINING
+===================
+Bulleted list. Each "training" item in Sivivi uses the `name` field
+as the bullet text; format the paragraph in Word as a bullet list,
+then put:
+
+  {{#trainings}}
+  {{name}}
+  {{/trainings}}
+
+(`organizer`, `year`, `location`, `description` are still available
+if you want a richer layout — e.g. "{{name}} — {{organizer}}, {{year}}".)
+
+
+WORK EXPERIENCE  (optional section)
+-----------------------------------
+{{#experiences}}
+{{role}} — {{company}}
+{{duration}} · {{location}}
+{{description}}
+{{/experiences}}
+
+
+PROJECT EXPERIENCES — SUMMARY TABLE
+====================================
+Layout in Word: a 3-column table with header No | Posisi | Tahun.
+Put the loop on the body row:
+
+  | {{#projects}}{{index}} | {{position}} | {{time_schedule}}{{/projects}} |
+
+
+PROJECT EXPERIENCES — DETAILED ENTRIES
+=======================================
+Repeated block per project. Each project has a multi-bullet "Project"
+list and a multi-bullet "Specific Responsibility" list.
+
+{{#projects}}
+{{index}}.	Project			:
+{{#project_items}}
+		•	{{.}}
+{{/project_items}}
+	Time Schedule		: {{time_schedule}}
+	Company			: {{company}}
+	Location		: {{location}}
+	Position		: {{position}}
+	Specific Responsibility	:
+{{#responsibilities}}
+		•	{{.}}
+{{/responsibilities}}
+
+{{/projects}}
+
+
+SKILLS  (optional)
+------------------
+{{#skills}}
+{{name}} ({{level}})
+{{/skills}}
+
+
+CERTIFICATIONS  (optional)
+--------------------------
+{{#certifications}}
+{{name}} — {{issuer}}, {{year}}
+{{/certifications}}
+
+
+CONDITIONAL HEADINGS
+====================
+Hide a heading when its section is empty:
+  {{#has_projects}}PROJECT EXPERIENCES{{/has_projects}}
+
+Flags available: has_experiences, has_education, has_skills,
+has_trainings, has_certifications, has_projects.
+
+
+NOTES
+-----
+- Original template file is never modified.
+- Output: /generated/CV_{FULLNAME}.docx
+- {{index}} is auto-injected (1-based) into every loop.
+- {{.}} inside {{#project_items}} / {{#responsibilities}} prints the
+  current bullet's text.
+- For tables, place the opening loop tag at the start of the FIRST
+  cell of the body row and the closing tag at the end of the LAST
+  cell — docxtemplater duplicates the entire row per iteration.
+- To avoid double spacing between bullets, do NOT leave blank
+  paragraphs inside a loop. Use paragraph "Space After" formatting
+  instead.

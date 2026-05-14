@@ -1,0 +1,23 @@
+[
+  {
+    "id": "upstream",
+    "name": "Upstream",
+    "description": "Upstream CV template.",
+    "file": "UPSTREAM.docx",
+    "preview": "UPSTREAM.png"
+  },
+  {
+    "id": "epcom",
+    "name": "EPCOM",
+    "description": "EPCOM CV template.",
+    "file": "EPCOM.docx",
+    "preview": "EPCOM.png"
+  },
+  {
+    "id": "enho",
+    "name": "ENHO",
+    "description": "ENHO CV template.",
+    "file": "ENHO.docx",
+    "preview": "ENHO.png"
+  }
+]
