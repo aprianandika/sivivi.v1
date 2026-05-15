@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, session, shell } = require('electron');
 const path = require('path');
 
 const registerTemplateHandlers = require('./ipc/templates.cjs');
@@ -55,8 +55,20 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   paths.ensureDirs();
+
+  // Wipe any service worker / cache storage left over from earlier builds
+  // that shipped vite-plugin-pwa. Those SWs intercept file:// requests and
+  // serve a stale bundle on top of the new one, producing
+  // "Identifier 'xb' has already been declared" / blank-screen errors.
+  try {
+    await session.defaultSession.clearStorageData({
+      storages: ['serviceworkers', 'cachestorage'],
+    });
+  } catch (err) {
+    console.warn('[startup] could not clear service worker storage:', err.message);
+  }
 
   registerTemplateHandlers();
   registerExcelHandlers();
