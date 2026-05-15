@@ -85,17 +85,30 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    // Terser is more conservative than esbuild's minifier. esbuild was
-    // creating a top-level name collision in the bundle ("var vb" from one
-    // library + "function vb" from sanitizeFilename, both mangled to vb),
-    // which is a SyntaxError per the ES Module spec.
     minify: 'terser',
     terserOptions: {
-      mangle: {
-        // Mangle local/inner names freely, but DON'T rename top-level
-        // declarations. That's where the collision was happening.
-        toplevel: false,
+      // Never rename top-level identifiers — that's what produced the
+      // "var vb / function vb" collision in earlier deploys.
+      mangle: { toplevel: false },
+      // Belt: keep function and class names readable so even if Rollup
+      // creates a duplicate, source identifiers (e.g. sanitizeFilename)
+      // survive to the final output and can't collide with library aliases.
+      keep_fnames: true,
+      keep_classnames: true,
+    },
+    rollupOptions: {
+      output: {
+        // Suspenders: split heavy libraries into their own chunks so their
+        // top-level scopes are physically separate files. Each chunk parses
+        // in its own module scope — `var foo` in xlsx can't collide with
+        // `function foo` in docxtemplater anymore.
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          xlsx: ['xlsx'],
+          docx: ['docxtemplater', 'pizzip'],
+        },
       },
     },
+    chunkSizeWarningLimit: 1500,
   },
 }));
