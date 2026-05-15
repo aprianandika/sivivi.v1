@@ -85,5 +85,17 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    // Terser is more conservative than esbuild's minifier. esbuild was
+    // creating a top-level name collision in the bundle ("var vb" from one
+    // library + "function vb" from sanitizeFilename, both mangled to vb),
+    // which is a SyntaxError per the ES Module spec.
+    minify: 'terser',
+    terserOptions: {
+      mangle: {
+        // Mangle local/inner names freely, but DON'T rename top-level
+        // declarations. That's where the collision was happening.
+        toplevel: false,
+      },
+    },
   },
 }));
