@@ -32,7 +32,16 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+    const indexPath = path.join(__dirname, '..', 'dist', 'index.html');
+    mainWindow.loadFile(indexPath);
+    // Surface load errors so a blank screen isn't silent. Press F12 / Ctrl+Shift+I
+    // to open DevTools at any time.
+    mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
+      console.error(`[did-fail-load] ${code} ${desc} → ${url}`);
+    });
+    mainWindow.webContents.on('render-process-gone', (_e, details) => {
+      console.error('[render-process-gone]', details);
+    });
   }
 
   // Open external links in default browser

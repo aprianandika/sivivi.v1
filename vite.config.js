@@ -21,35 +21,40 @@ export default defineConfig(({ mode }) => ({
         },
       ],
     }),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png'],
-      manifest: {
-        name: 'Sivivi — CV Generator',
-        short_name: 'Sivivi',
-        description: 'Local CV generator. Fill, choose a template, get a .docx.',
-        theme_color: '#1f3fe6',
-        background_color: '#0f172a',
-        display: 'standalone',
-        orientation: 'any',
-        start_url: './',
-        scope: './',
-        icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
-        ],
-      },
-      workbox: {
-        // Pre-cache app shell + bundled templates so PWA works offline.
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,docx,json,webp,jpg,jpeg}'],
-        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
-        navigateFallback: 'index.html',
-      },
-      devOptions: {
-        // Enable service worker in dev so we can iterate on PWA features.
-        enabled: mode === 'web',
-      },
-    }),
+    // PWA / service worker is ONLY for the web build. In Electron, file://
+    // protocol can't register a service worker — the auto-injected
+    // registerSW.js fails and blanks the screen. Skip the plugin entirely.
+    ...(mode === 'web'
+      ? [
+          VitePWA({
+            registerType: 'autoUpdate',
+            includeAssets: ['favicon.svg', 'icons/*.png'],
+            manifest: {
+              name: 'Sivivi — CV Generator',
+              short_name: 'Sivivi',
+              description: 'Local CV generator. Fill, choose a template, get a .docx.',
+              theme_color: '#1f3fe6',
+              background_color: '#0f172a',
+              display: 'standalone',
+              orientation: 'any',
+              start_url: './',
+              scope: './',
+              icons: [
+                { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+                { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+              ],
+            },
+            workbox: {
+              globPatterns: ['**/*.{js,css,html,ico,png,svg,docx,json,webp,jpg,jpeg}'],
+              maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+              navigateFallback: 'index.html',
+            },
+            devOptions: {
+              enabled: true,
+            },
+          }),
+        ]
+      : []),
   ],
   // For Electron: relative paths work with file:// loading.
   // For Web (PWA): absolute path so service worker scope matches.
