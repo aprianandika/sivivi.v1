@@ -4,7 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sivivi — CV Generator</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <!--
+      First-load recovery: if a previous deploy registered a service worker
+      whose precached bundle now collides with the new one ("Identifier 'xb'
+      has already been declared"), this inline script unregisters every SW,
+      clears every Cache Storage entry, and reloads once. Runs before any
+      bundle so a corrupt bundle can't prevent the cleanup.
+    -->
+    <script>
+      (function () {
+        if (!('serviceWorker' in navigator)) return;
+        var FLAG = 'sivivi-sw-cleanup-done';
+        if (sessionStorage.getItem(FLAG)) return;
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          if (regs.length === 0) return;
+          var unregs = regs.map(function (r) { return r.unregister(); });
+          var cacheKill = 'caches' in globalThis
+            ? caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+              })
+            : Promise.resolve();
+          Promise.all([Promise.all(unregs), cacheKill]).then(function () {
+            sessionStorage.setItem(FLAG, '1');
+            location.reload();
+          });
+        }).catch(function () {});
+      })();
+    </script>
   </head>
   <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
     <div id="app"></div>

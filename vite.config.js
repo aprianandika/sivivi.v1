@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
       ? [
           VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.svg', 'icons/*.png'],
+            includeAssets: ['favicon.svg'],
             manifest: {
               name: 'Sivivi — CV Generator',
               short_name: 'Sivivi',
@@ -37,17 +37,30 @@ export default defineConfig(({ mode }) => ({
               background_color: '#0f172a',
               display: 'standalone',
               orientation: 'any',
-              start_url: './',
-              scope: './',
+              start_url: '/',
+              scope: '/',
+              // SVG icon avoids shipping placeholder PNGs. Chrome / Edge /
+              // most browsers accept SVG for PWA install prompts.
               icons: [
-                { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-                { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+                {
+                  src: 'favicon.svg',
+                  sizes: 'any',
+                  type: 'image/svg+xml',
+                  purpose: 'any maskable',
+                },
               ],
             },
             workbox: {
               globPatterns: ['**/*.{js,css,html,ico,png,svg,docx,json,webp,jpg,jpeg}'],
               maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
               navigateFallback: 'index.html',
+              // Critical: ensure each new deploy wipes the previous precache
+              // and takes over the page immediately. Without these, an old
+              // SW keeps serving a stale chunk while the new bundle also
+              // loads, producing "Identifier '...' has already been declared".
+              cleanupOutdatedCaches: true,
+              clientsClaim: true,
+              skipWaiting: true,
             },
             devOptions: {
               enabled: true,
